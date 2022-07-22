@@ -349,27 +349,27 @@ func LicenseManagerReady(ctx context.Context, deployment *Deployment, testenvIns
 
 // LicenseMasterReady verify LM is in ready status and does not flip flop
 func LicenseMasterReady(ctx context.Context, deployment *Deployment, testenvInstance *TestCaseEnv) {
-	LicenseManager := &enterpriseApi.LicenseMaster{}
+	LicenseMaster := &enterpriseApi.LicenseMaster{}
 
 	testenvInstance.Log.Info("Verifying License Master becomes READY")
 	gomega.Eventually(func() enterpriseApi.Phase {
-		err := deployment.GetInstance(ctx, deployment.GetName(), LicenseManager)
+		err := deployment.GetInstance(ctx, deployment.GetName(), LicenseMaster)
 		if err != nil {
 			return enterpriseApi.PhaseError
 		}
 		testenvInstance.Log.Info("Waiting for License Master instance status to be ready",
-			"instance", LicenseManager.ObjectMeta.Name, "Phase", LicenseManager.Status.Phase)
+			"instance", LicenseMaster.ObjectMeta.Name, "Phase", LicenseMaster.Status.Phase)
 		DumpGetPods(testenvInstance.GetName())
 		DumpGetTopPods(testenvInstance.GetName())
 		DumpGetTopNodes()
 
-		return LicenseManager.Status.Phase
+		return LicenseMaster.Status.Phase
 	}, deployment.GetTimeout(), PollInterval).Should(gomega.Equal(enterpriseApi.PhaseReady))
 
 	// In a steady state, we should stay in Ready and not flip-flop around
 	gomega.Consistently(func() enterpriseApi.Phase {
-		_ = deployment.GetInstance(ctx, deployment.GetName(), LicenseManager)
-		return LicenseManager.Status.Phase
+		_ = deployment.GetInstance(ctx, deployment.GetName(), LicenseMaster)
+		return LicenseMaster.Status.Phase
 	}, ConsistentDuration, ConsistentPollInterval).Should(gomega.Equal(enterpriseApi.PhaseReady))
 }
 
